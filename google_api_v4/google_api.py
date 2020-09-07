@@ -21,8 +21,7 @@ class GoogleApi:
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
     API_KEY = "AIzaSyACFRyobBkIAxJTarjFN3NCiwO7-VVi8Us"
     API_URL = "https://sheets.googleapis.com/v4/spreadsheets/{id}/values/{range_}?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=RAW&key={api}"
-    STORE = ""
-    DICOVERY_SERVICE = ""
+
 
     def __init__(self) -> None:
         super(GoogleApi, self).__init__()
@@ -55,7 +54,6 @@ class GoogleApi:
 
         try:
             service = build('sheets', 'v4', credentials=creds)
-            print(service)
         except Exception as e:
             print(e)
             return False
@@ -69,22 +67,6 @@ class GoogleApi:
 
         if not self.SHEET: return False
 
-        # ##############################################
-        # self.STORE = file.Storage('diskovery.json')
-
-
-        # flow = client.flow_from_clientsecrets(
-        #     self.CREDS, 
-        #     [
-        #        'https://www.googleapis.com/auth/drive',
-        #        'https://www.googleapis.com/auth/drive.file',
-        #        'https://www.googleapis.com/auth/spreadsheets',
-        #     ]
-        # )
-
-        # self.DICOVERY = tools.run_flow(flow, self.STORE)
-
-        # self.DICOVERY_SERVICE = discovery.build('sheets', 'v4', credentials=creds)
 
 
     def get_spreadsheet(self, spreadsheet_creds: dict) -> 'An api object':
@@ -93,7 +75,6 @@ class GoogleApi:
                                                         spreadsheetId=spreadsheet_creds['id'],
                                                         range=spreadsheet_creds['name']
                                                     ).execute()
-            print(get_spread_sheet)
             return get_spread_sheet
         except Exception as e:
             print(e)
@@ -102,7 +83,6 @@ class GoogleApi:
     def get_values_of_spreadsheet(self, spreadsheet_creds: dict) -> list:
 
         get_spreadsheet_object = self.get_spreadsheet(spreadsheet_creds)
-        print(get_spreadsheet_object)
         if not get_spreadsheet_object: return False
         try:
             values = get_spreadsheet_object.get('values', [])
@@ -191,71 +171,57 @@ class GoogleApi:
 
         return data
 
-    def write_data_to_spread_sheet(self, spreadsheet_creds: dict):
+    def write_data_to_spread_sheet(self, spreadsheet_creds: dict, data: list):
+        try:
 
+            spreadsheet_id = spreadsheet_creds['id']
 
-        # The ID of the spreadsheet to update.
-        spreadsheet_id = spreadsheet_creds['id']
-
-        # The A1 notation of the values to update.
-        range_ = 'sheet1!A2'
-        # api_path = self.API_URL.format(id=spreadsheet_creds['id'], range_=range_,api=self.API_KEY)
-        # print(api_path)
-        # How the input data should be interpreted.
-        value_input_option = {}
-
-        
-        values = [
-            [
-                "lol",
-                "kek",
-                "aplet"
-            ]
-        ]
-        
-        data = [
-            {
-                'range': range_,
-                'values': values
-            },
-            # Additional ranges to update ...
-        ]
-
-        value_input_option = "RAW"
+            # data = [
+            #     {
+            #         'range': range_,
+            #         'values': values
+            #     },
+            #     # Additional ranges to update ...
+            # ]
+            value_input_option = "RAW"
+                
+            body = {
+                'valueInputOption': value_input_option,
+                'data': data
+            }
             
-        body = {
-            'valueInputOption': value_input_option,
-            'data': data
-        }
-        
-        # r = requests.put(api_path,data=value_range_body).text
-        # print(r)
 
-        result = self.SHEET.values().batchUpdate(
-        spreadsheetId=spreadsheet_id, body=body).execute()
-        print('{0} cells updated.'.format(result.get('totalUpdatedCells')))
-    # def write_to_spread_sheet(self, spreadsheet_creds: dict, writable_data: ):
+            result = self.SHEET.values().batchUpdate(
+            spreadsheetId=spreadsheet_id, body=body).execute()
 
-    #     values = [
-    #         [
-    #             # Cell values ...
-    #         ],
-    #         # Additional rows ...
-    #     ]
-    #     body = {
-    #         'values': values
-    #     }
-    #     result = self.SHEET.values().update(
-    #         spreadsheetId=spreadsheet_creds['id'], range=spreadsheet_creds['name'],
-    #         valueInputOption=value_input_option, body=body).execute()
-    #     print('{0} cells updated.'.format(result.get('updatedCells')))
+        except Exception as e:
+            print(e)
+            return False
 
 
 
+"""
+    @How to Work
+    google_api = GoogleApi()
+
+    # values = google_api.get_values_of_spreadsheet(SPREAD_SHEETS['service_spreadsheet'])
+    l = google_api.write_data_to_spread_sheet(SPREAD_SHEETS['service_spreadsheet'])
+    
+    # access_schema = {
+
+    #     "key_column_number": 2,
+    #     "login_path": 3,
+    #     "login_name": 4,
+    #     "login_password": 5,
+
+    # }
+
+    # access_data = google_api.convert_values_to_dict(access_schema, values)
+
+    # get_only = google_api.get_specific_values_in_list([2,3,4,5], values)
 
 
-
-
+"""
 
 
 
